@@ -83,6 +83,8 @@ function M.on_show(event, kind, content, replace_last)
   if kind == M.kinds.search_count then
     message = M.get(event, kind)
     Hacks.fix_nohlsearch()
+    local search_message = content[1][2]
+    content[1][2] = string.sub(search_message, string.find(search_message, "[", 1, true), -1)
   else
     message = Message(event, kind)
     message.cmdline = Cmdline.active
