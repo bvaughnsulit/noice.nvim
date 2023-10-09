@@ -1,4 +1,4 @@
-*noice.nvim.txt*         For Neovim >= 0.8.0         Last change: 2023 July 25
+*noice.nvim.txt*        For Neovim >= 0.8.0       Last change: 2023 October 25
 
 ==============================================================================
 Table of Contents                               *noice.nvim-table-of-contents*
@@ -88,7 +88,7 @@ Suggested setup:
 >lua
     require("noice").setup({
       lsp = {
-        -- override markdown rendering so that cmp and other plugins use Treesitter
+        -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
@@ -113,10 +113,10 @@ vim-plug ~
 
 >vim
     " vim-plug
-    call plugbegin()
+    call plug#begin()
       Plug 'folke/noice.nvim'
       Plug 'MunifTanjim/nui.nvim'
-    call plugend()
+    call plug#end()
     
     lua require("noice").setup()
 <
@@ -142,12 +142,12 @@ for configuration recipes.
           -- opts: any options passed to the view
           -- icon_hl_group: optional hl_group for the icon
           -- title: set to anything or empty string to hide
-          cmdline = { pattern = "^:", icon = "", lang = "vim" },
-          search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex" },
-          search_up = { kind = "search", pattern = "^%?", icon = " ", lang = "regex" },
-          filter = { pattern = "^:%s!", icon = "$", lang = "bash" },
-          lua = { pattern = { "^:%slua%s+", "^:%slua%s=%s", "^:%s=%s" }, icon = "", lang = "lua" },
-          help = { pattern = "^:%she?l?p?%s+", icon = "" },
+          cmdline = { pattern = "^:", icon = "", lang = "vim" },
+          search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex" },
+          search_up = { kind = "search", pattern = "^%?", icon = " ", lang = "regex" },
+          filter = { pattern = "^:%s*!", icon = "$", lang = "bash" },
+          lua = { pattern = { "^:%s*lua%s+", "^:%s*lua%s*=%s*", "^:%s*=%s*" }, icon = "", lang = "lua" },
+          help = { pattern = "^:%s*he?l?p?%s+", icon = "" },
           input = {}, -- Used by input()
           -- lua = false, -- to disable a format, set to `false`
         },
@@ -293,9 +293,9 @@ for configuration recipes.
         highlights = {
           ["|%S-|"] = "@text.reference",
           ["@%S+"] = "@parameter",
-          ["^%s(Parameters:)"] = "@text.title",
-          ["^%s(Return:)"] = "@text.title",
-          ["^%s(See also:)"] = "@text.title",
+          ["^%s*(Parameters:)"] = "@text.title",
+          ["^%s*(Return:)"] = "@text.title",
+          ["^%s*(See also:)"] = "@text.title",
           ["{%S-}"] = "@parameter",
         },
       },
@@ -337,19 +337,19 @@ If you don’t want to use a Nerd Font, you can replace the icons with Unicode s
         cmdline = {
           format = {
             cmdline = { icon = ">" },
-            search_down = { icon = "⌄" },
-            search_up = { icon = "⌃" },
+            search_down = { icon = "🔍⌄" },
+            search_up = { icon = "🔍⌃" },
             filter = { icon = "$" },
-            lua = { icon = "" },
+            lua = { icon = "☾" },
             help = { icon = "?" },
           },
         },
         format = {
           level = {
             icons = {
-              error = "",
-              warn = "",
-              info = "",
+              error = "✖",
+              warn = "▼",
+              info = "●",
             },
           },
         },
@@ -359,7 +359,7 @@ If you don’t want to use a Nerd Font, you can replace the icons with Unicode s
         inc_rename = {
           cmdline = {
             format = {
-              IncRename = { icon = "" }
+              IncRename = { icon = "⟳" },
             },
           },
         },
@@ -485,12 +485,12 @@ Example: ~
 >lua
     -- override the default split view to always enter the split when it opens
     require("noice").setup({
-        views = {
-            split = {
-                enter = true
-              }
-          }
-      })
+      views = {
+        split = {
+          enter = true,
+        },
+      },
+    })
 <
 
 
@@ -515,7 +515,7 @@ OptionDescriptionsize, positionSize, position and their constituents can additio
     }
 <
 
-
+scrollbarSet to false to hide the scrollbar.
 NOTIFY OPTIONS ~
 
   -------------------------------------------------------------------------------------------------
@@ -683,17 +683,17 @@ Example of configuring lualine.nvim ~
           {
             require("noice").api.status.command.get,
             cond = require("noice").api.status.command.has,
-            color = { fg = "ff9e64" },
+            color = { fg = "#ff9e64" },
           },
           {
             require("noice").api.status.mode.get,
             cond = require("noice").api.status.mode.has,
-            color = { fg = "ff9e64" },
+            color = { fg = "#ff9e64" },
           },
           {
             require("noice").api.status.search.get,
             cond = require("noice").api.status.search.has,
-            color = { fg = "ff9e64" },
+            color = { fg = "#ff9e64" },
           },
         },
       },
@@ -767,25 +767,25 @@ it again. When exiting the cmdline, the popup window will be focused.
 
 >lua
     vim.keymap.set("c", "<S-Enter>", function()
-        require("noice").redirect(vim.fn.getcmdline())
-        end, { desc = "Redirect Cmdline" })
+      require("noice").redirect(vim.fn.getcmdline())
+    end, { desc = "Redirect Cmdline" })
 <
 
 
 LSP HOVER DOC SCROLLING ~
 
 >lua
-      vim.keymap.set({"n", "i", "s"}, "<c-f>", function()
-        if not require("noice.lsp").scroll(4) then
-          return "<c-f>"
-        end
-      end, { silent = true, expr = true })
+    vim.keymap.set({ "n", "i", "s" }, "<c-f>", function()
+      if not require("noice.lsp").scroll(4) then
+        return "<c-f>"
+      end
+    end, { silent = true, expr = true })
     
-      vim.keymap.set({"n", "i", "s"}, "<c-b>", function()
-        if not require("noice.lsp").scroll(-4) then
-          return "<c-b>"
-        end
-      end, { silent = true, expr = true })
+    vim.keymap.set({ "n", "i", "s" }, "<c-b>", function()
+      if not require("noice.lsp").scroll(-4) then
+        return "<c-b>"
+      end
+    end, { silent = true, expr = true })
 <
 
 
@@ -793,12 +793,11 @@ HIGHLIGHT GROUPS     *noice.nvim-noice-(nice,-noise,-notice)-highlight-groups*
 
 Click to see all highlight groups ~
 
-  ---------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------
   Highlight Group                      Default Group                    Description
-  ------------------------------------ -------------------------------- -----------------------
+  ------------------------------------ -------------------------------- -----------------------------
   NoiceCmdline                         MsgArea                          Normal for the classic
-                                                                        cmdline area at the
-                                                                        bottom”
+                                                                        cmdline area at the bottom”
 
   NoiceCmdlineIcon                     DiagnosticSignInfo               Cmdline icon
 
@@ -816,11 +815,9 @@ Click to see all highlight groups ~
 
   NoiceCmdlineIconLua                  NoiceCmdlineIcon                 
 
-  NoiceCmdlineIconSearch               DiagnosticSignWarn               Cmdline search icon (/
-                                                                        and ?)
+  NoiceCmdlineIconSearch               DiagnosticSignWarn               Cmdline search icon (/ and ?)
 
-  NoiceCmdlinePopup                    Normal                           Normal for the cmdline
-                                                                        popup
+  NoiceCmdlinePopup                    Normal                           Normal for the cmdline popup
 
   NoiceCmdlinePopupBorder              DiagnosticSignInfo               Cmdline popup border
 
@@ -838,8 +835,8 @@ Click to see all highlight groups ~
 
   NoiceCmdlinePopupBorderLua           NoiceCmdlinePopupBorder          
 
-  NoiceCmdlinePopupBorderSearch        DiagnosticSignWarn               Cmdline popup border
-                                                                        for search
+  NoiceCmdlinePopupBorderSearch        DiagnosticSignWarn               Cmdline popup border for
+                                                                        search
 
   NoiceCmdlinePopupTitle               DiagnosticSignInfo               Cmdline popup border
 
@@ -889,17 +886,13 @@ Click to see all highlight groups ~
 
   NoiceCompletionItemKindVariable      NoiceCompletionItemKindDefault   
 
-  NoiceCompletionItemMenu              none                             Normal for the
-                                                                        popupmenu
+  NoiceCompletionItemMenu              none                             Normal for the popupmenu
 
-  NoiceCompletionItemWord              none                             Normal for the
-                                                                        popupmenu
+  NoiceCompletionItemWord              none                             Normal for the popupmenu
 
-  NoiceConfirm                         Normal                           Normal for the confirm
-                                                                        view
+  NoiceConfirm                         Normal                           Normal for the confirm view
 
-  NoiceConfirmBorder                   DiagnosticSignInfo               Border for the confirm
-                                                                        view
+  NoiceConfirmBorder                   DiagnosticSignInfo               Border for the confirm view
 
   NoiceCursor                          Cursor                           Fake Cursor
 
@@ -931,8 +924,7 @@ Click to see all highlight groups ~
 
   NoiceFormatTitle                     Title                            
 
-  NoiceLspProgressClient               Title                            Lsp progress client
-                                                                        name
+  NoiceLspProgressClient               Title                            Lsp progress client name
 
   NoiceLspProgressSpinner              Constant                         Lsp progress spinner
 
@@ -944,13 +936,12 @@ Click to see all highlight groups ~
 
   NoicePopupBorder                     FloatBorder                      Border for popup views
 
-  NoicePopupmenu                       Pmenu                            Normal for the
-                                                                        popupmenu
+  NoicePopupmenu                       Pmenu                            Normal for the popupmenu
 
   NoicePopupmenuBorder                 FloatBorder                      Popupmenu border
 
-  NoicePopupmenuMatch                  Special                          Part of the item that
-                                                                        matches the input
+  NoicePopupmenuMatch                  Special                          Part of the item that matches
+                                                                        the input
 
   NoicePopupmenuSelected               PmenuSel                         Selected item in the
                                                                         popupmenu
@@ -965,7 +956,7 @@ Click to see all highlight groups ~
 
   NoiceVirtualText                     DiagnosticVirtualTextInfo        Default hl group for
                                                                         virtualtext views
-  ---------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------
 ==============================================================================
 2. Links                                                    *noice.nvim-links*
 

@@ -52,6 +52,11 @@ function M.fix_nohlsearch()
   M.fix_nohlsearch()
 end
 
+---@see https://github.com/neovim/neovim/issues/20793
+function M.draw_cursor()
+  require("noice.util.ffi").setcursor_mayforce(true)
+end
+
 ---@see https://github.com/neovim/neovim/issues/17810
 function M.fix_incsearch()
   ---@type integer|nil
@@ -62,7 +67,7 @@ function M.fix_incsearch()
     callback = function(event)
       if event.match == "/" or event.match == "?" then
         conceallevel = vim.wo.conceallevel
-        vim.wo.conceallevel = 0
+        vim.opt_local.conceallevel = 0
       end
     end,
   })
@@ -71,7 +76,7 @@ function M.fix_incsearch()
     group = M.group,
     callback = function(event)
       if conceallevel and (event.match == "/" or event.match == "?") then
-        vim.wo.conceallevel = conceallevel
+        vim.opt_local.conceallevel = conceallevel
         conceallevel = nil
       end
     end,
@@ -145,11 +150,14 @@ end
 ---@see https://github.com/neovim/neovim/issues/20311
 M.before_input = false
 function M.fix_input()
-  local function wrap(fn, skip, redirect)
+  local function wrap(fn, skip)
     return function(...)
       if skip and skip(...) then
         return fn(...)
       end
+
+      -- make sure the cursor is drawn before blocking
+      M.draw_cursor()
 
       local Manager = require("noice.message.manager")
 
@@ -157,20 +165,8 @@ function M.fix_input()
       M.before_input = true
       Router.update()
 
-      if redirect then
-        require("noice.ui").redirect()
-      end
-
-      if not redirect then
-        M.hide_cursor()
-      end
-
       ---@type boolean, any
       local ok, ret = pcall(fn, ...)
-
-      if not redirect then
-        M.show_cursor()
-      end
 
       -- clear any message right after input
       Manager.clear({ event = "msg_show", kind = { "echo", "echomsg", "" } })
@@ -237,18 +233,15 @@ function M.fix_cmp()
   end)
 end
 
-local was_in_cmdline = false
 function M.cmdline_force_redraw()
-  local ffi = require("noice.util.ffi")
-  local pos = vim.fn.getcmdpos()
-  local in_cmdline = pos < #vim.fn.getcmdline() + 1
-  if ffi.cmdpreview and (in_cmdline or was_in_cmdline) then
-    was_in_cmdline = in_cmdline
-    -- HACK: this will trigger redraw during substitute and cmdpreview,
-    -- but when moving the cursor, the screen will be cleared until
-    -- a new character is entered
-    ffi.update_screen()
+  if not require("noice.util.ffi").cmdpreview then
+    return
   end
+
+  -- HACK: this will trigger redraw during substitute and cmdpreview,
+  -- but when moving the cursor, the screen will be cleared until
+  -- a new character is entered
+  vim.api.nvim_input(" <bs>")
 end
 
 ---@type string?
